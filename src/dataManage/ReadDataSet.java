@@ -3,6 +3,7 @@ package dataManage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import co.nstant.in.cbor.CborException;
 import edu.unh.cs.treccar.Data;
@@ -13,19 +14,20 @@ import entities.Paragraph;
 public class ReadDataSet {
 
 	// Only used for testing reading data set.
-	// public static void main(String[] args) throws Exception {
-	// System.out.println("Start reading data set...");
-	// System.setProperty("file.encoding", "UTF-8");
-	//
-	// ArrayList<Page> list = new ArrayList<Page>();
-	//
-	// list = getAllPagesFromDataSet();
-	//
-	// for (Page p : list) {
-	// System.out.println(p.getPageId() + " " + p.getPageName());
-	// }
-	//
-	// }
+	public static void main(String[] args) throws Exception {
+		System.out.println("Start reading data set...");
+		System.setProperty("file.encoding", "UTF-8");
+
+		// ArrayList<Page> list = new ArrayList<Page>();
+
+		// list = getAllPagesFromDataSet();
+
+		// for (Page p : list) {
+		// System.out.println(p.getPageId() + " " + p.getPageName());
+		// }
+
+		HashMap<String, ArrayList<String>> result = getAllrelevantWithQueryId();
+	}
 
 	// Get all pages data as object list.
 	public static ArrayList<Page> getAllPagesFromDataSet() {
@@ -77,6 +79,25 @@ public class ReadDataSet {
 		}
 		System.out.println("Get " + pList.size() + " paragraphs in total by Treccar-tool.");
 		return pList;
+	}
+
+	public static HashMap<String, ArrayList<String>> getAllrelevantWithQueryId() {
+		HashMap<String, ArrayList<String>> result = new HashMap<String, ArrayList<String>>();
+
+		String dataFilePath = "./DataSet/test200/train.test200.cbor.article.qrels";
+		FileInputStream stream = readingDataFiles(dataFilePath);
+
+		try {
+			for (Data.Page p : DeserializeData.iterableAnnotations(stream)) {
+				System.out.println(p.getPageId());
+				// System.out.println(p.getLinkSection());
+
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+
+		return result;
 	}
 
 	public static FileInputStream readingDataFiles(String dataFilesPath) {

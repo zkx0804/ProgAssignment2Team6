@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.ScoreDoc;
@@ -18,7 +19,8 @@ import entities.RankDoc;
 
 public class GetRankingResult {
 
-	static String team_name = "Team6";
+	private static String default_teamName = "Team6";
+	private static int default_size = 100;
 
 	/*
 	 * Main class for Question 1;
@@ -32,8 +34,6 @@ public class GetRankingResult {
 
 		String booleanStr = args[0];
 		Boolean useDefaultEngine = true;
-		int default_size = 100;
-		String default_teamName = "Team6";
 		String method_name = "";
 
 		ArrayList<RankDoc> rankResult = new ArrayList<RankDoc>();
@@ -95,13 +95,82 @@ public class GetRankingResult {
 
 	}
 
+	/*
+	 * Return a HashMap for all rank result, use queryId for key.
+	 * 
+	 */
+	public static HashMap<String, ArrayList<RankDoc>> getRankingResultMap(boolean useDefaultEngine) {
+
+		// <pageId/queryId, list of ranked doc>
+		HashMap<String, ArrayList<RankDoc>> resultMap = new HashMap<String, ArrayList<RankDoc>>();
+
+		String method_name = "";
+
+		ArrayList<Page> pageList = ReadDataSet.getAllPagesFromDataSet();
+		ArrayList<Paragraph> dataList = ReadDataSet.getAllParagraphFromDataSet();
+
+		try {
+			ParagraphsIndexer indexer = new ParagraphsIndexer();
+			indexer.rebuildIndexes(dataList);
+
+			if (useDefaultEngine) {
+				System.out.println("Use Lucene Default Scoring Function...");
+				method_name = "Default";
+			} else {
+				System.out.println("Use Custom Scoring Function...");
+				method_name = "Custom";
+			}
+
+			for (Page page : pageList) {
+				System.out.println("Search with search query ===> " + page.getPageName());
+
+				ArrayList<RankDoc> rankResult = new ArrayList<RankDoc>();
+
+				String queryStr = page.getPageName();
+				SearchEngine se = new SearchEngine(useDefaultEngine);
+				TopDocs topDocs = se.performSearch(queryStr, default_size);
+				System.out.println("Result found: " + topDocs.totalHits);
+
+				ScoreDoc[] hits = topDocs.scoreDocs;
+				for (int i = 0; i < hits.length; i++) {
+					Document doc = se.getDocument(hits[i].doc);
+
+					RankDoc rank = new RankDoc();
+					rank.setQueryId(page.getPageId());
+					rank.setParahId(doc.get("id"));
+					rank.setRank(i + 1);
+					rank.setScore(hits[i].score);
+					String nameStr = default_teamName + "-" + method_name;
+					rank.setTeamMethodName(nameStr);
+
+					rankResult.add(rank);
+				}
+
+				if (!resultMap.containsKey(page.getPageId())) {
+					resultMap.put(page.getPageId(), rankResult);
+				} else {
+					ArrayList<RankDoc> exisitingRank = resultMap.get(page.getPageId());
+					exisitingRank.addAll(rankResult);
+					resultMap.put(page.getPageId(), exisitingRank);
+				}
+				System.out.println("Search done. Get " + rankResult.size() + " result for " + page.getPageId());
+				System.out.print("==========================");
+			}
+
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+
+		return resultMap;
+	}
+
 	public static void wirteResultToFile(ArrayList<RankDoc> resultList, boolean useDefaultEngine) {
 		if (!resultList.isEmpty()) {
-			String fileName = "result.txt";
+			String fileName = "result.qrels";
 			if (useDefaultEngine) {
-				fileName = "result-defaultScoreFunc.txt";
+				fileName = "result-defaultScoreFunc.qrels";
 			} else {
-				fileName = "result-customScoreFun.txt";
+				fileName = "result-customScoreFun.qrels";
 			}
 			String filePath = "./" + fileName;
 			BufferedWriter bWriter = null;
@@ -117,10 +186,11 @@ public class GetRankingResult {
 					// rank.getParahId(), rank.getRank(), rank.getScore(),
 					// rank.getTeamMethodName());
 
-					String space = "     ";
+					String space = " ";
 					String line = rank.getQueryId() + space + "Q0" + space + rank.getParahId() + space + rank.getRank()
 							+ space + rank.getScore() + space + rank.getTeamMethodName();
 					bWriter.write(line);
+					bWriter.newLine();
 				}
 
 				System.out.println("Write all ranking result to file: " + fileName);
