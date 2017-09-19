@@ -2,7 +2,6 @@ package dataManage;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import co.nstant.in.cbor.CborException;
@@ -18,18 +17,39 @@ public class ReadDataSet {
 	// System.out.println("Start reading data set...");
 	// System.setProperty("file.encoding", "UTF-8");
 	//
-	// readingDataFiles();
+	// ArrayList<Page> list = new ArrayList<Page>();
 	//
-	// // ArrayList<Paragraph> list = new ArrayList<Paragraph>();
-	// // list = getAllParagraphFromDataSet();
-	// // System.out.println("List size: " + list.size());
-	// // System.out.println(list);
+	// list = getAllPagesFromDataSet();
+	//
+	// for (Page p : list) {
+	// System.out.println(p.getPageId() + " " + p.getPageName());
+	// }
 	//
 	// }
 
 	// Get all pages data as object list.
 	public static ArrayList<Page> getAllPagesFromDataSet() {
 		ArrayList<Page> pageList = new ArrayList<Page>();
+		String dataFilePath = "./DataSet/test200/train.test200.cbor.outlines";
+
+		FileInputStream stream = readingDataFiles(dataFilePath);
+
+		try {
+			for (Data.Page dataP : DeserializeData.iterableAnnotations(stream)) {
+				// System.out.println(dataP.getParaId());
+				// System.out.print(dataP.getEntitiesOnly());
+				// System.out.println(dataP.getTextOnly());
+				// System.out.println();
+				Page p = new Page();
+				p.setPageId(dataP.getPageId());
+				p.setPageName(dataP.getPageName());
+				pageList.add(p);
+
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		System.out.println("Get " + pageList.size() + " pages in total by Treccar-tool.");
 
 		return pageList;
 	}
@@ -70,37 +90,6 @@ public class ReadDataSet {
 			return null;
 		}
 
-	}
-
-	// Only for test.
-	public static void readingDataFiles() throws CborException {
-		File file = new File("./DataSet/test200/train.test200.cbor.paragraphs");
-		FileInputStream fis = null;
-		Data.Paragraph testP = null;
-		try {
-			fis = new FileInputStream(file);
-			System.out.println("Total file size to read (in bytes) : " + fis.available());
-
-			for (Data.Paragraph p : DeserializeData.iterableParagraphs(fis)) {
-				System.out.println(p.getParaId());
-				// System.out.print(p.getEntitiesOnly());
-
-				// System.out.println(p.getBodies());
-				System.out.println();
-
-				if (p.getParaId().equalsIgnoreCase("fee82b9f00a6f7b83b9611fcdb4d11fb091d930a")) {
-					testP = p;
-				}
-
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		System.out.println("Find match:");
-		System.out.println(testP.getTextOnly());
-		System.out.println("============");
-		System.out.println(testP.getBodies());
 	}
 
 }
