@@ -112,8 +112,14 @@ public class GetRankingResult {
 				bWriter = new BufferedWriter(fWriter);
 
 				for (RankDoc rank : resultList) {
-					String line = String.format("%-20s %5s %20s %10s %10s %20s \r\n", rank.getQueryId(), "Q0",
-							rank.getParahId(), rank.getRank(), rank.getScore(), rank.getTeamMethodName());
+					// String line = String.format("%-20s %5s %20s %10s %10s
+					// %20s \r\n", rank.getQueryId(), "Q0",
+					// rank.getParahId(), rank.getRank(), rank.getScore(),
+					// rank.getTeamMethodName());
+
+					String space = "     ";
+					String line = rank.getQueryId() + space + "Q0" + space + rank.getParahId() + space + rank.getRank()
+							+ space + rank.getScore() + space + rank.getTeamMethodName();
 					bWriter.write(line);
 				}
 
