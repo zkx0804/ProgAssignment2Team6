@@ -1,9 +1,11 @@
 package dataManage;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.TreeMap;
 
 import co.nstant.in.cbor.CborException;
 import edu.unh.cs.treccar.Data;
@@ -26,7 +28,9 @@ public class ReadDataSet {
 		// System.out.println(p.getPageId() + " " + p.getPageName());
 		// }
 
-		HashMap<String, ArrayList<String>> result = getAllrelevantWithQueryId();
+		TreeMap<String, ArrayList<String>> result = getAllrelevantWithQueryId();
+
+		System.out.println(result);
 	}
 
 	// Get all pages data as object list.
@@ -81,20 +85,42 @@ public class ReadDataSet {
 		return pList;
 	}
 
-	public static HashMap<String, ArrayList<String>> getAllrelevantWithQueryId() {
-		HashMap<String, ArrayList<String>> result = new HashMap<String, ArrayList<String>>();
+	// Use TreeMap for sorted key.
+	public static TreeMap<String, ArrayList<String>> getAllrelevantWithQueryId() {
+		TreeMap<String, ArrayList<String>> result = new TreeMap<String, ArrayList<String>>();
 
 		String dataFilePath = "./DataSet/test200/train.test200.cbor.article.qrels";
-		FileInputStream stream = readingDataFiles(dataFilePath);
-
+		BufferedReader reader = null;
 		try {
-			for (Data.Page p : DeserializeData.iterableAnnotations(stream)) {
-				System.out.println(p.getPageId());
-				// System.out.println(p.getLinkSection());
+			FileInputStream stream = readingDataFiles(dataFilePath);
+			reader = new BufferedReader(new InputStreamReader(stream));
 
+			String line = reader.readLine();
+			while (line != null) {
+				String[] strList = line.split("\\s");
+				String queryId = strList[0];
+				String docId = strList[2];
+				int isRelevant = Integer.valueOf(strList[3]);
+
+				if (result.containsKey(queryId)) {
+					if (isRelevant > 0) {
+						ArrayList<String> relevDocs = result.get(queryId);
+						relevDocs.add(docId);
+						result.put(queryId, relevDocs);
+					}
+				} else {
+					ArrayList<String> relevDocs = new ArrayList<String>();
+					if (isRelevant > 0) {
+						relevDocs.add(docId);
+					}
+					result.put(queryId, relevDocs);
+				}
+
+				line = reader.readLine();
 			}
+
 		} catch (Throwable e) {
-			e.printStackTrace();
+
 		}
 
 		return result;
