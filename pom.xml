@@ -45,6 +45,33 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.2.1</version>
+				<executions>
+					<execution>
+						<id>first-execution</id>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>main.GetRankingResult</mainClass>
+							<arguments>
+								<argument>run</argument>
+							</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>second-execution</id>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>main.PercisionAtR</mainClass>
+							<arguments>
+								<argument>run</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
+
 			</plugin>
 		</plugins>
 	</build>
