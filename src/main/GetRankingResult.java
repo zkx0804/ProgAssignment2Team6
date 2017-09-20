@@ -166,11 +166,11 @@ public class GetRankingResult {
 
 	public static void wirteResultToFile(ArrayList<RankDoc> resultList, boolean useDefaultEngine) {
 		if (!resultList.isEmpty()) {
-			String fileName = "result.qrels";
+			String fileName = "result.txt";
 			if (useDefaultEngine) {
-				fileName = "result-defaultScoreFunc.qrels";
+				fileName = "result-defaultScoreFunc.txt";
 			} else {
-				fileName = "result-customScoreFun.qrels";
+				fileName = "result-customScoreFun.txt";
 			}
 			String filePath = "./" + fileName;
 			BufferedWriter bWriter = null;

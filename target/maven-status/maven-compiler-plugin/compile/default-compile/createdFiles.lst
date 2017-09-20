@@ -1,0 +1,9 @@
+dataManage\SearchEngine.class
+entities\Paragraph.class
+main\GetRankingResult.class
+dataManage\SearchEngine$1.class
+dataManage\ParagraphsIndexer.class
+entities\RankDoc.class
+dataManage\ReadDataSet.class
+main\PercisionAtR.class
+entities\Page.class
